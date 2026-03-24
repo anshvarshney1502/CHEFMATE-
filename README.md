@@ -98,13 +98,6 @@ src/
 
 ---
 
-## 🌍 Browser Requirements
-
-- Chrome 96+ or Edge 96+ (Chrome 120+ recommended)
-- WebAssembly support
-- SharedArrayBuffer (requires Cross-Origin Isolation headers)
-- OPFS (for persistent model caching)
-
 ---
 
 ## 🏆 Built At
