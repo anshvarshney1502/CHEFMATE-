@@ -1,130 +1,124 @@
-# RunAnywhere Web Starter App
+# 🍳 ChefMate — Your AI Kitchen Companion
 
-A minimal React + TypeScript starter app demonstrating **on-device AI in the browser** using the [`@runanywhere/web`](https://www.npmjs.com/package/@runanywhere/web) SDK. All inference runs locally via WebAssembly — no server, no API key, 100% private.
+> **Voice-first, offline-capable cooking assistant powered entirely by on-device AI. No cloud. No API keys. 100% private.**
 
-## Features
+Built for **HackXtreme** · Problem Statement #3: Voice-First Conversational Apps · Powered by [RunAnywhere SDK](https://runanywhere.ai)
 
-| Tab | What it does |
-|-----|-------------|
-| **Chat** | Stream text from an on-device LLM (LFM2 350M) |
-| **Vision** | Point your camera and describe what the VLM sees (LFM2-VL 450M) |
-| **Voice** | Speak naturally — VAD detects speech, STT transcribes, LLM responds, TTS speaks back |
+---
 
-## Quick Start
+## ✨ Features
+
+| Feature | Description |
+|--------|-------------|
+| 🎙️ **Voice Chat** | Hands-free cooking — ask recipes, get ingredients & steps read aloud via on-device STT + TTS |
+| 🤖 **AI Recipe Cards** | Structured cards with difficulty level, ingredient chips, and numbered steps |
+| 🔊 **Speak Button** | TTS reads the full recipe aloud — no need to look at the screen while cooking |
+| 📴 **Offline Mode** | Text-based AI chat works completely without internet after first model download |
+| 💾 **Save Recipes** | Save favourite recipes locally for quick access anytime |
+| 📋 **Copy & Share** | Copy recipe to clipboard or share via WhatsApp and other platforms |
+| ⏱️ **Custom Timer** | Set cooking timers hands-free via voice or manually |
+| 🛒 **Grocery List** | Ingredients auto-added to sidebar — check them off one by one as you cook |
+| 🕐 **Chat History** | All previous recipe conversations saved and searchable in the sidebar |
+| 📶 **Offline Badge** | Clear visual indicator when running in offline mode |
+| 🌙 **Light & Dark Mode** | Full theme support for any kitchen environment |
+
+---
+
+## 🚀 How It Works
+
+ChefMate runs **entirely on your device** using the RunAnywhere SDK. The AI model is downloaded once on first launch and cached locally — after that, no internet is needed for text-based cooking assistance.
+
+```
+RunAnywhere SDK (on-device)
+  ├── LLM (SmolLM2 1.2B)   → Recipe generation, ingredient info, cooking Q&A
+  ├── STT (Whisper)         → Voice commands & hands-free input  
+  └── TTS                   → Reads recipes & responses aloud
+```
+
+**Voice Pipeline (100% on-device):**
+```
+Your Voice → STT → LLM → TTS → Audio Response
+```
+
+Zero network requests. Zero cloud latency. Everything local.
+
+---
+
+## 🛠️ Quick Start
 
 ```bash
+# Clone the repo
+git clone https://github.com/anshvarshney1502/CHEFMATE-.git
+cd CHEFMATE-
+
+# Install dependencies
 npm install
+
+# Start the app
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173). Models are downloaded on first use and cached in the browser's Origin Private File System (OPFS).
+Open [http://localhost:5173](http://localhost:5173)
 
-## How It Works
+> ⚠️ On first launch, the app downloads the AI model (~1.2GB). This happens **once** and is cached in your browser's OPFS. After that, everything works fully offline.
 
-```
-@runanywhere/web (npm package)
-  ├── WASM engine (llama.cpp, whisper.cpp, sherpa-onnx)
-  ├── Model management (download, OPFS cache, load/unload)
-  └── TypeScript API (TextGeneration, STT, TTS, VAD, VLM, VoicePipeline)
-```
+---
 
-The app imports everything from `@runanywhere/web`:
+## 🧠 Tech Stack
 
-```typescript
-import { RunAnywhere, SDKEnvironment } from '@runanywhere/web';
-import { TextGeneration, VLMWorkerBridge } from '@runanywhere/web-llamacpp';
+| Layer | Technology |
+|-------|-----------|
+| Framework | React + TypeScript + Vite |
+| On-Device AI | RunAnywhere SDK (`@runanywhere/web`) |
+| LLM | SmolLM2 1.2B (WebAssembly / llama.cpp) |
+| Speech-to-Text | RunAnywhere Whisper STT (on-device) |
+| Text-to-Speech | RunAnywhere TTS (on-device) |
+| Styling | Tailwind CSS + shadcn/ui |
+| Storage | OPFS (model cache) + LocalStorage (recipes & history) |
 
-await RunAnywhere.initialize({ environment: SDKEnvironment.Development });
+---
 
-// Stream LLM text
-const { stream } = await TextGeneration.generateStream('Hello!', { maxTokens: 200 });
-for await (const token of stream) { console.log(token); }
-
-// VLM: describe an image
-const result = await VLMWorkerBridge.shared.process(rgbPixels, width, height, 'Describe this.');
-```
-
-## Project Structure
+## 📁 Project Structure
 
 ```
 src/
-├── main.tsx              # React root
-├── App.tsx               # Tab navigation (Chat | Vision | Voice)
-├── runanywhere.ts        # SDK init + model catalog + VLM worker
-├── workers/
-│   └── vlm-worker.ts     # VLM Web Worker entry (2 lines)
-├── hooks/
-│   └── useModelLoader.ts # Shared model download/load hook
+├── App.tsx                 # Root app
+├── main.tsx                # React entry point
+├── runanywhere.ts          # SDK init + model config
 ├── components/
-│   ├── ChatTab.tsx        # LLM streaming chat
-│   ├── VisionTab.tsx      # Camera + VLM inference
-│   ├── VoiceTab.tsx       # Full voice pipeline
-│   └── ModelBanner.tsx    # Download progress UI
-└── styles/
-    └── index.css          # Dark theme CSS
+│   ├── ChatArea.tsx        # Main recipe chat interface
+│   ├── ChatTab.tsx         # Chat tab with history sidebar
+│   ├── VoiceTab.tsx        # Hands-free voice pipeline
+│   ├── RecipeCard.tsx      # Structured recipe card UI
+│   ├── InputBar.tsx        # Text + voice input bar
+│   ├── Header.tsx          # App header + theme toggle
+│   ├── ModelBanner.tsx     # Model download progress UI
+│   └── ShareModal.tsx      # Share recipe options
 ```
 
-## Adding Your Own Models
+---
 
-Edit the `MODELS` array in `src/runanywhere.ts`:
+## 🌍 Browser Requirements
 
-```typescript
-{
-  id: 'my-custom-model',
-  name: 'My Model',
-  repo: 'username/repo-name',           // HuggingFace repo
-  files: ['model.Q4_K_M.gguf'],         // Files to download
-  framework: LLMFramework.LlamaCpp,
-  modality: ModelCategory.Language,      // or Multimodal, SpeechRecognition, etc.
-  memoryRequirement: 500_000_000,        // Bytes
-}
-```
-
-Any GGUF model compatible with llama.cpp works for LLM/VLM. STT/TTS/VAD use sherpa-onnx models.
-
-## Deployment
-
-### Vercel
-
-```bash
-npm run build
-npx vercel --prod
-```
-
-The included `vercel.json` sets the required Cross-Origin-Isolation headers.
-
-### Netlify
-
-Add a `_headers` file:
-
-```
-/*
-  Cross-Origin-Opener-Policy: same-origin
-  Cross-Origin-Embedder-Policy: credentialless
-```
-
-### Any static host
-
-Serve the `dist/` folder with these HTTP headers on all responses:
-
-```
-Cross-Origin-Opener-Policy: same-origin
-Cross-Origin-Embedder-Policy: credentialless
-```
-
-## Browser Requirements
-
-- Chrome 96+ or Edge 96+ (recommended: 120+)
-- WebAssembly (required)
+- Chrome 96+ or Edge 96+ (Chrome 120+ recommended)
+- WebAssembly support
 - SharedArrayBuffer (requires Cross-Origin Isolation headers)
-- OPFS (for persistent model cache)
+- OPFS (for persistent model caching)
 
-## Documentation
+---
 
-- [SDK API Reference](https://docs.runanywhere.ai)
-- [npm package](https://www.npmjs.com/package/@runanywhere/web)
-- [GitHub](https://github.com/RunanywhereAI/runanywhere-sdks)
+## 🏆 Built At
 
-## License
+**HackXtreme Hackathon**  
+Problem Statement #3: Voice-First Conversational Apps  
+Category: Web Applications
+
+---
+
+## 📄 License
 
 MIT
+
+---
+
+> *ChefMate proves that AI doesn't need the cloud to be powerful. Your kitchen. Your data. Your device.*
